@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Review Dashboard</title>
+    <title>PPH Transfer Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
         
         .dashboard {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
-            overflow: hidden;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         
         .header {
@@ -28,725 +33,1124 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
         
         .header h1 {
-            font-size: 2.5em;
-            margin: 0 0 10px 0;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            font-weight: 300;
         }
         
-        .metrics {
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .last-updated {
+            position: absolute;
+            bottom: 15px;
+            right: 30px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .controls-section {
+            background: #f8f9fa;
+            padding: 25px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .dropdown {
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            font-size: 1em;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+        
+        .dropdown:hover {
+            border-color: #667eea;
+        }
+        
+        .dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             padding: 30px;
             background: #f8f9fa;
         }
         
-        .metric-card {
+        .stat-card {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            border-left: 5px solid #667eea;
         }
         
-        .metric-value {
-            font-size: 2em;
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.success {
+            border-left-color: #28a745;
+        }
+        
+        .stat-card.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .stat-card.danger {
+            border-left-color: #dc3545;
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
             font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1em;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            background: white;
+        }
+        
+        .chart-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .chart-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .transfer-form {
+            background: white;
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .form-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-input {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .file-upload-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px dashed #e9ecef;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .file-upload-section:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .file-upload-section.dragover {
+            border-color: #667eea;
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.1em;
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        .upload-subtext {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .file-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-icon {
+            font-size: 1.5em;
+            color: #667eea;
+        }
+        
+        .file-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .file-name {
+            font-weight: 600;
             color: #2c3e50;
         }
         
-        .metric-label {
-            color: #666;
-            text-transform: uppercase;
-            font-size: 0.9em;
-            margin-top: 5px;
+        .file-size {
+            font-size: 0.85em;
+            color: #6c757d;
         }
         
-        .table-container {
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .file-action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-download {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background: #218838;
+        }
+        
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-remove:hover {
+            background: #c82333;
+        }
+        
+        .upload-progress {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .upload-progress-bar {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .transfer-table {
+            background: white;
             padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .table-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
         
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 0.9em;
+            margin-top: 15px;
         }
         
         .data-table th,
         .data-table td {
-            padding: 8px;
+            padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e9ecef;
         }
         
         .data-table th {
             background: #f8f9fa;
-            font-weight: bold;
+            font-weight: 600;
+            color: #2c3e50;
             position: sticky;
             top: 0;
         }
         
         .status-badge {
-            padding: 4px 8px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            font-weight: bold;
-            white-space: nowrap;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
         }
         
-        .status-lgtm { background: #d4edda; color: #155724; }
-        .status-wip { background: #fff3cd; color: #856404; }
-        .status-flagged { background: #f8d7da; color: #721c24; }
-        .status-not-started { background: #e2e3e5; color: #383d41; }
-        
-        .update-section {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-top: 1px solid #ddd;
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
         }
         
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-right: 10px;
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
         }
         
-        .btn-primary { background: #667eea; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
         
-        .csv-input {
-            width: 100%;
-            height: 150px;
-            margin: 15px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-family: monospace;
-            display: none;
+        .status-review {
+            background: #d1ecf1;
+            color: #0c5460;
         }
-
-        .task-token {
-            font-family: monospace;
-            font-size: 0.8em;
-            color: #666;
-        }
-
-        .slack-link {
-            color: #4a90e2;
-            text-decoration: none;
-            font-size: 0.8em;
-        }
-
-        .slack-link:hover {
-            text-decoration: underline;
-        }
-
-        .overdue {
-            background-color: #fff5f5;
-        }
-
+        
         .table-wrapper {
-            max-height: 600px;
+            max-height: 500px;
             overflow-y: auto;
-        }
-
-        .nav-tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-            margin: 0;
-            padding: 0;
-        }
-
-        .nav-tab {
-            padding: 15px 25px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            color: #666;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .nav-tab:hover {
-            background: #e9ecef;
-            color: #333;
-        }
-
-        .nav-tab.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-            background: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .px-metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .px-metric-card {
-            background: white;
-            padding: 15px;
             border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid #667eea;
+            border: 1px solid #e9ecef;
         }
-
-        .px-error-p3 { border-left-color: #dc3545; }
-        .px-error-none { border-left-color: #28a745; }
-        .px-submitted { border-left-color: #ffc107; }
+        
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-group {
+                justify-content: space-between;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <div class="header">
-            <h1>Task Review Dashboard</h1>
-            <p>Real-time insights into task completion and team performance</p>
-            <p style="font-size: 0.9em; opacity: 0.8;">Last updated: September 05, 2025 at 09:28 AM</p>
+            <h1>PPH Transfer Dashboard</h1>
+            <p>Previous Payroll History Transfer Management & Analytics</p>
+            <div class="last-updated" id="lastUpdated">Last updated: September 05, 2025 at 09:45 AM</div>
         </div>
         
-        <div class="metrics">
-            <div class="metric-card">
-                <div class="metric-value">16</div>
-                <div class="metric-label">Total Tasks</div>
+        <div class="controls-section">
+            <div class="control-group">
+                <label class="control-label">Report Type:</label>
+                <select class="dropdown" id="reportTypeFilter">
+                    <option value="All">All Report Types</option>
+                    <option value="Paychex">Paychex</option>
+                    <option value="ADP">ADP</option>
+                    <option value="Sure Payroll">Sure Payroll</option>
+                    <option value="TOAST">TOAST</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
-            <div class="metric-card">
-                <div class="metric-value">12</div>
-                <div class="metric-label">Completed (LGTM)</div>
+            
+            <div class="control-group">
+                <label class="control-label">Status Filter:</label>
+                <select class="dropdown" id="statusFilter">
+                    <option value="All">All Statuses</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                    <option value="Review">Under Review</option>
+                </select>
             </div>
-            <div class="metric-card">
-                <div class="metric-value">2</div>
-                <div class="metric-label">In Progress/WIP</div>
+            
+            <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh Data</button>
+            <button class="btn btn-success" onclick="exportData()">📥 Export CSV</button>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-card success">
+                <div class="stat-value" id="totalTransfers">156</div>
+                <div class="stat-label">Total Transfers</div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value">0</div>
-                <div class="metric-label">Not Started</div>
+            <div class="stat-card success">
+                <div class="stat-value" id="completedTransfers">142</div>
+                <div class="stat-label">Completed</div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value">2</div>
-                <div class="metric-label">Flagged</div>
+            <div class="stat-card warning">
+                <div class="stat-value" id="pendingTransfers">8</div>
+                <div class="stat-label">Pending</div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value">75%</div>
-                <div class="metric-label">Completion Rate</div>
+            <div class="stat-card danger">
+                <div class="stat-value" id="failedTransfers">6</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successRate">91%</div>
+                <div class="stat-label">Success Rate</div>
             </div>
         </div>
         
-        <div class="update-section">
-            <button class="btn btn-primary" onclick="toggleUpdate()">📝 Update Data</button>
-            <span id="status">🔄 Live sync with Google Sheets - Updated September 05, 2025 at 09:28 AM</span>
-            
-            <textarea id="csvInput" class="csv-input" placeholder="1. Go to your Google Sheet
-2. Select all data (Ctrl+A or Cmd+A)  
-3. Copy (Ctrl+C or Cmd+C)
-4. Paste here and click Apply"></textarea>
-            
-            <div id="updateButtons" style="display: none; margin-top: 10px;">
-                <button class="btn btn-success" onclick="applyUpdate()">Apply Update</button>
-                <button class="btn btn-secondary" onclick="cancelUpdate()">Cancel</button>
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">Transfer Status Distribution</div>
+                <canvas id="statusChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Transfers by Report Type</div>
+                <canvas id="reportTypeChart"></canvas>
             </div>
         </div>
         
-        <div class="table-container">
-            <div class="nav-tabs">
-                <button class="nav-tab active" onclick="switchTab('overview')">📋 All Tasks Overview</button>
-                <button class="nav-tab" onclick="switchTab('px-scoring')">📊 PX Scoring</button>
+        <div class="transfer-form">
+            <div class="form-title">📝 New PPH Transfer Entry</div>
+            
+            <!-- File Upload Section -->
+            <div class="file-upload-section" id="fileUploadSection">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Upload PPH Files</div>
+                <div class="upload-subtext">Drag and drop files here or click to browse<br>
+                Supported formats: PDF, Excel (.xlsx, .xls), CSV, Images (.jpg, .png)</div>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.xlsx,.xls,.csv,.jpg,.jpeg,.png">
+                <button type="button" class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    📤 Choose Files
+                </button>
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                </div>
             </div>
             
-            <div id="overview-tab" class="tab-content active">
-                <h2 style="margin-top: 20px;">All Tasks Overview (16 total)</h2>
-                <div class="table-wrapper">
-                <table class="data-table">
+            <!-- Uploaded Files List -->
+            <div class="file-list" id="fileList"></div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Employer Name</label>
+                    <input type="text" class="form-input" id="employerName" placeholder="Enter employer name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Report Type</label>
+                    <select class="form-input" id="newReportType">
+                        <option value="">Select Report Type</option>
+                        <option value="Paychex">Paychex</option>
+                        <option value="ADP">ADP</option>
+                        <option value="Sure Payroll">Sure Payroll</option>
+                        <option value="TOAST">TOAST</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Employee Count</label>
+                    <input type="number" class="form-input" id="employeeCount" placeholder="Number of employees">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transfer Status</label>
+                    <select class="form-input" id="transferStatus">
+                        <option value="">Select Status</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Failed">Failed</option>
+                        <option value="Review">Under Review</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Task Token</label>
+                    <input type="text" class="form-input" id="taskToken" placeholder="task_XXXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Assigned To</label>
+                    <input type="text" class="form-input" id="assignedTo" placeholder="Team member name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Transfer Notes</label>
+                <textarea class="form-input form-textarea" id="transferNotes" placeholder="Enter any notes about the transfer process, issues encountered, or special requirements..."></textarea>
+            </div>
+            <button class="btn btn-success" onclick="addTransfer()">➕ Add Transfer</button>
+        </div>
+        
+        <div class="transfer-table">
+            <div class="table-title">📊 PPH Transfer Records</div>
+            <div class="table-wrapper">
+                <table class="data-table" id="transferTable">
                     <thead>
                         <tr>
-                            <th>Review Date</th>
-                            <th>Team Member</th>
-                            <th>Task Type</th>
-                            <th>Task Token</th>
+                            <th>Date</th>
+                            <th>Employer</th>
+                            <th>Report Type</th>
+                            <th>Employee Count</th>
                             <th>Status</th>
-                            <th>Days on List</th>
-                            <th>Assignee</th>
-                            <th>Comments/Notes</th>
+                            <th>Task Token</th>
+                            <th>Assigned To</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-
-        <tr class="overdue">
-            <td>8/15/2025</td>
-            <td>Katrina</td>
-            <td>POB</td>
-            <td class="task-token">task_EXAMPLECASE</td>
-            <td><span class="status-badge status-flagged">Flagged</span></td>
-            <td>16</td>
-            <td>Liberty</td>
-            <td><a href="https://sq-block.slack.com/archives/C09DJRNKF7B/p1756947562052079" class="slack-link" target="_blank">Slack Link</a></td>
-        </tr>
-
-        <tr class="overdue">
-            <td>8/17/2025</td>
-            <td>Rebecca</td>
-            <td>POB</td>
-            <td class="task-token">task_ACoBXlO3MwwJGt5n</td>
-            <td><span class="status-badge status-flagged">Passback to Entry</span></td>
-            <td>15</td>
-            <td>Liberty</td>
-            <td><a href="https://square.slack.com/archives/C05M59KAVF0/p1755277852737009" class="slack-link" target="_blank">Slack Link</a></td>
-        </tr>
-
-        <tr class="overdue">
-            <td>8/21/2025</td>
-            <td>Jonas</td>
-            <td>POB</td>
-            <td class="task-token">task_WFJQQK9tXmkhrEpJ</td>
-            <td><span class="status-badge status-lgtm">Case Closed</span></td>
-            <td>12</td>
-            <td>Liberty</td>
-            <td><a href="https://square.slack.com/archives/C05M59KAVF0/p1755807969070049" class="slack-link" target="_blank">Slack Link</a></td>
-        </tr>
-
-        <tr class="overdue">
-            <td>8/29/2025</td>
-            <td>Rebecca</td>
-            <td>POB</td>
-            <td class="task-token">task_Cu1RpgfY3vgwnlIB</td>
-            <td><span class="status-badge status-lgtm">Case Closed</span></td>
-            <td>6</td>
-            <td>Liberty</td>
-            <td><a href="https://square.slack.com/archives/C05M59KAVF0/p1756478311300349" class="slack-link" target="_blank">Slack Link</a></td>
-        </tr>
-
-        <tr class="overdue">
-            <td>8/29/2025</td>
-            <td>Lib/Rebecca</td>
-            <td>POB</td>
-            <td class="task-token">task_VK7gKqtVEYp4IyCN</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>6</td>
-            <td>Esther</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>8/29/2025</td>
-            <td>Cess</td>
-            <td>TBV</td>
-            <td class="task-token">task_hFTESEESZuT3iPrg</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>6</td>
-            <td>Liberty</td>
-            <td><a href="https://square.slack.com/archives/C05M59KAVF0/p1756834257812999" class="slack-link" target="_blank">Slack Link</a></td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/2/2025</td>
-            <td>Cess</td>
-            <td>POB</td>
-            <td class="task-token">task_I7bwY2Kv8Wkv2jNd</td>
-            <td><span class="status-badge status-lgtm">Case Closed</span></td>
-            <td>4</td>
-            <td>Liberty</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/2/2025</td>
-            <td>Jonas</td>
-            <td>POB</td>
-            <td class="task-token">task_o53cTYi6Yc3859Qg</td>
-            <td><span class="status-badge status-wip">Audit WIP</span></td>
-            <td>4</td>
-            <td>Liberty</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/3/2025</td>
-            <td>Rebecca</td>
-            <td>POB</td>
-            <td class="task-token">task_ozjknr7w1PDdabm4</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>3</td>
-            <td>Liberty</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/3/2025</td>
-            <td>Jonas</td>
-            <td>POB</td>
-            <td class="task-token">task_lvmOJqASZbG2xpSB</td>
-            <td><span class="status-badge status-wip">Audit WIP</span></td>
-            <td>3</td>
-            <td>Liberty</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/3/2025</td>
-            <td>Cess</td>
-            <td>POB</td>
-            <td class="task-token">task_0SAIYszUDlWWAixR</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>3</td>
-            <td>Esther</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/3/2025</td>
-            <td>Jay</td>
-            <td>POB</td>
-            <td class="task-token">task_fJKf5ytYNuKLbGi5</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>3</td>
-            <td>Liberty</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/3/2025</td>
-            <td>Jonas</td>
-            <td>POB</td>
-            <td class="task-token">task_IkgXAg0EFBFE38wS</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>3</td>
-            <td>Esther</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/4/2025</td>
-            <td>Jay</td>
-            <td>POB</td>
-            <td class="task-token">task_fwCy8fZ7AOZAxWsA</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>2</td>
-            <td>Liberty</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/4/2025</td>
-            <td>Cess</td>
-            <td>TBV</td>
-            <td class="task-token">task_DCdJwWzDMbA5qzEe</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>2</td>
-            <td>Liberty</td>
-            <td>-</td>
-        </tr>
-
-        <tr class="overdue">
-            <td>9/4/2025</td>
-            <td>Jonas</td>
-            <td>POB</td>
-            <td class="task-token">task_ioFLxAtQ3mXTNb19</td>
-            <td><span class="status-badge status-lgtm">LGTM</span></td>
-            <td>2</td>
-            <td>Liberty</td>
-            <td>-</td>
-        </tr>
+                    <tbody id="transferTableBody">
                     </tbody>
                 </table>
-            </div>
-            </div>
-            
-            <div id="px-scoring-tab" class="tab-content">
-                <h2 style="margin-top: 20px;">PX Scoring Analysis</h2>
-                
-                <div class="px-metrics">
-                    <div class="px-metric-card px-error-p3">
-                        <div class="metric-value">3</div>
-                        <div class="metric-label">P3 Errors</div>
-                    </div>
-                    <div class="px-metric-card px-submitted">
-                        <div class="metric-value">2</div>
-                        <div class="metric-label">Scoring Submitted</div>
-                    </div>
-                </div>
-                
-                <!-- Download Button -->
-                <div style="margin-bottom: 20px;">
-                    <button class="btn btn-success" onclick="downloadPXScoringCSV()">📥 Download PX Scoring CSV</button>
-                </div>
-                
-                <!-- PX Scoring Chart -->
-                <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <h3 style="margin-top: 0;">PX Scoring Status Overview</h3>
-                    <div style="position: relative; height: 300px; width: 100%;">
-                        <canvas id="pxChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="table-wrapper">
-                    <table class="data-table" id="pxScoringTable">
-                        <thead>
-                            <tr>
-                                <th>Task Token</th>
-                                <th>PX Errors</th>
-                                <th>PX Scoring Submitted? (Y/N)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="task-token">task_EXAMPLECASE</td>
-                                <td>P3</td>
-                                <td>[9/03][Esther] [example only - not actually posted]</td>
-                            </tr>
-                            <tr>
-                                <td class="task-token">task_ozjknr7w1PDdabm4</td>
-                                <td>P3</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td class="task-token">task_fJKf5ytYNuKLbGi5</td>
-                                <td>P3</td>
-                                <td>[09/03] [Jay] Yes</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleUpdate() {
-            const csvInput = document.getElementById('csvInput');
-            const updateButtons = document.getElementById('updateButtons');
-            
-            if (csvInput.style.display === 'none' || csvInput.style.display === '') {
-                csvInput.style.display = 'block';
-                updateButtons.style.display = 'block';
-                csvInput.focus();
-            } else {
-                cancelUpdate();
+        // Sample PPH Transfer data
+        let transferData = [
+            {
+                id: 1,
+                date: '2025-09-05',
+                employer: 'ABC Manufacturing Inc',
+                reportType: 'Paychex',
+                employeeCount: 45,
+                status: 'Completed',
+                taskToken: 'task_PPH001',
+                assignedTo: 'Esther',
+                notes: 'Standard PPH transfer completed successfully. All employee records validated.'
+            },
+            {
+                id: 2,
+                date: '2025-09-04',
+                employer: 'Tech Solutions LLC',
+                reportType: 'ADP',
+                employeeCount: 23,
+                status: 'Pending',
+                taskToken: 'task_PPH002',
+                assignedTo: 'Jonas',
+                notes: 'Waiting for missing payroll data from Q2. ER contacted for additional information.'
+            },
+            {
+                id: 3,
+                date: '2025-09-04',
+                employer: 'Downtown Restaurant Group',
+                reportType: 'TOAST',
+                employeeCount: 67,
+                status: 'Review',
+                taskToken: 'task_PPH003',
+                assignedTo: 'Liberty',
+                notes: 'Complex transfer with multiple locations. Requires manual verification of tip allocations.'
+            },
+            {
+                id: 4,
+                date: '2025-09-03',
+                employer: 'Small Business Co',
+                reportType: 'Sure Payroll',
+                employeeCount: 8,
+                status: 'Failed',
+                taskToken: 'task_PPH004',
+                assignedTo: 'Rebecca',
+                notes: 'Transfer failed due to corrupted PPH file. Requesting new file from ER.'
+            },
+            {
+                id: 5,
+                date: '2025-09-03',
+                employer: 'Healthcare Partners',
+                reportType: 'Other',
+                employeeCount: 156,
+                status: 'Completed',
+                taskToken: 'task_PPH005',
+                assignedTo: 'Jay',
+                notes: 'Large healthcare organization transfer completed with custom payroll system integration.'
+            },
+            {
+                id: 6,
+                date: '2025-09-02',
+                employer: 'Construction Works Inc',
+                reportType: 'ADP',
+                employeeCount: 34,
+                status: 'Completed',
+                taskToken: 'task_PPH006',
+                assignedTo: 'Cess',
+                notes: 'Union payroll transfer with prevailing wage calculations verified.'
             }
+        ];
+
+        let filteredData = [...transferData];
+        let nextId = 7;
+        let uploadedFiles = [];
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            updateStats();
+            renderTable();
+            initializeCharts();
+            updateLastUpdated();
+            initializeFileUpload();
         }
-        
-        function cancelUpdate() {
-            document.getElementById('csvInput').style.display = 'none';
-            document.getElementById('updateButtons').style.display = 'none';
-            document.getElementById('csvInput').value = '';
+
+        // Initialize file upload functionality
+        function initializeFileUpload() {
+            const fileUploadSection = document.getElementById('fileUploadSection');
+            const fileInput = document.getElementById('fileInput');
+
+            // Drag and drop events
+            fileUploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadSection.classList.add('dragover');
+            });
+
+            fileUploadSection.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                fileUploadSection.classList.remove('dragover');
+            });
+
+            fileUploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadSection.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                handleFileUpload(files);
+            });
+
+            // File input change event
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                handleFileUpload(files);
+            });
         }
-        
-        function applyUpdate() {
-            const csvText = document.getElementById('csvInput').value.trim();
-            if (csvText) {
-                if (csvText.includes(',') && csvText.split('\n').length > 2) {
-                    document.getElementById('status').textContent = '✅ Data updated: ' + new Date().toLocaleString();
-                    alert('✅ Data updated successfully!\n\nThe dashboard has been refreshed with your latest data.');
-                    cancelUpdate();
-                    // In a real implementation, this would parse the CSV and update the table
+
+        // Handle file upload
+        function handleFileUpload(files) {
+            const allowedTypes = [
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-excel',
+                'text/csv',
+                'image/jpeg',
+                'image/jpg',
+                'image/png'
+            ];
+
+            files.forEach(file => {
+                if (allowedTypes.includes(file.type)) {
+                    const fileObj = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        size: formatFileSize(file.size),
+                        type: file.type,
+                        uploadDate: new Date().toISOString(),
+                        file: file
+                    };
+                    
+                    uploadedFiles.push(fileObj);
+                    simulateUpload(fileObj);
                 } else {
-                    alert('❌ Please paste valid CSV data.\n\nMake sure you:\n1. Selected ALL data in Google Sheets\n2. Copied it (Ctrl+C)\n3. Pasted it in the text area');
+                    alert(`File type not supported: ${file.name}`);
                 }
-            } else {
-                alert('📋 Please paste your CSV data first.\n\nSteps:\n1. Go to Google Sheets\n2. Select all (Ctrl+A)\n3. Copy (Ctrl+C)\n4. Paste here');
+            });
+
+            // Clear file input
+            document.getElementById('fileInput').value = '';
+        }
+
+        // Simulate file upload with progress
+        function simulateUpload(fileObj) {
+            const progressBar = document.getElementById('uploadProgressBar');
+            const progressContainer = document.getElementById('uploadProgress');
+            
+            progressContainer.style.display = 'block';
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        renderFileList();
+                    }, 500);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Get file icon based on type
+        function getFileIcon(type) {
+            if (type.includes('pdf')) return '📄';
+            if (type.includes('spreadsheet') || type.includes('excel')) return '📊';
+            if (type.includes('csv')) return '📋';
+            if (type.includes('image')) return '🖼️';
+            return '📁';
+        }
+
+        // Render uploaded files list
+        function renderFileList() {
+            const fileList = document.getElementById('fileList');
+            
+            if (uploadedFiles.length === 0) {
+                fileList.innerHTML = '';
+                return;
+            }
+
+            fileList.innerHTML = uploadedFiles.map(file => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-icon">${getFileIcon(file.type)}</div>
+                        <div class="file-details">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${file.size} • Uploaded ${new Date(file.uploadDate).toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="file-action-btn btn-download" onclick="downloadFile('${file.id}')">
+                            📥 Download
+                        </button>
+                        <button class="file-action-btn btn-remove" onclick="removeFile('${file.id}')">
+                            🗑️ Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Download file
+        function downloadFile(fileId) {
+            const file = uploadedFiles.find(f => f.id == fileId);
+            if (file) {
+                const url = URL.createObjectURL(file.file);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             }
         }
 
-        function switchTab(tabName) {
-            // Hide all tab contents
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(tab => tab.classList.remove('active'));
-            
-            // Remove active class from all tabs
-            const tabs = document.querySelectorAll('.nav-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.add('active');
-            
-            // Add active class to clicked tab
-            event.target.classList.add('active');
-            
-            // Initialize chart when PX Scoring tab is opened
-            if (tabName === 'px-scoring') {
-                initializePXChart();
+        // Remove file
+        function removeFile(fileId) {
+            if (confirm('Are you sure you want to remove this file?')) {
+                uploadedFiles = uploadedFiles.filter(f => f.id != fileId);
+                renderFileList();
             }
         }
 
-        function initializePXChart() {
-            const ctx = document.getElementById('pxChart').getContext('2d');
-            
-            // Check if chart already exists and destroy it
-            if (window.pxChartInstance) {
-                window.pxChartInstance.destroy();
-            }
-            
-            window.pxChartInstance = new Chart(ctx, {
+        // Update statistics
+        function updateStats() {
+            const total = filteredData.length;
+            const completed = filteredData.filter(t => t.status === 'Completed').length;
+            const pending = filteredData.filter(t => t.status === 'Pending').length;
+            const failed = filteredData.filter(t => t.status === 'Failed').length;
+            const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('totalTransfers').textContent = total;
+            document.getElementById('completedTransfers').textContent = completed;
+            document.getElementById('pendingTransfers').textContent = pending;
+            document.getElementById('failedTransfers').textContent = failed;
+            document.getElementById('successRate').textContent = successRate + '%';
+        }
+
+        // Render transfer table
+        function renderTable() {
+            const tbody = document.getElementById('transferTableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(transfer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(transfer.date).toLocaleDateString()}</td>
+                    <td><strong>${transfer.employer}</strong></td>
+                    <td><span style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">${transfer.reportType}</span></td>
+                    <td>${transfer.employeeCount}</td>
+                    <td><span class="status-badge status-${transfer.status.toLowerCase()}">${transfer.status}</span></td>
+                    <td style="font-family: monospace; font-size: 0.9em; color: #666;">${transfer.taskToken}</td>
+                    <td>${transfer.assignedTo}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${transfer.notes}">${transfer.notes}</td>
+                    <td>
+                        <button onclick="editTransfer(${transfer.id})" style="background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em;">Edit</button>
+                        <button onclick="deleteTransfer(${transfer.id})" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin-left: 5px;">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Status Chart
+            const statusCounts = {};
+            filteredData.forEach(transfer => {
+                statusCounts[transfer.status] = (statusCounts[transfer.status] || 0) + 1;
+            });
+
+            const statusChart = new Chart(document.getElementById('statusChart'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['Scoring Submitted', 'Pending Submission'],
+                    labels: Object.keys(statusCounts),
                     datasets: [{
-                        data: [2, 1], // 2 submitted, 1 pending (3 total P3 errors - 2 submitted = 1 pending)
-                        backgroundColor: [
-                            '#28a745', // Green for submitted
-                            '#ffc107'  // Yellow for pending
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#fff'
+                        data: Object.values(statusCounts),
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.parsed;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} (${percentage}%)`;
-                                }
-                            }
+                            position: 'bottom'
                         }
                     }
                 }
             });
+
+            // Report Type Chart
+            const reportTypeCounts = {};
+            filteredData.forEach(transfer => {
+                reportTypeCounts[transfer.reportType] = (reportTypeCounts[transfer.reportType] || 0) + 1;
+            });
+
+            const reportTypeChart = new Chart(document.getElementById('reportTypeChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(reportTypeCounts),
+                    datasets: [{
+                        label: 'Transfers',
+                        data: Object.values(reportTypeCounts),
+                        backgroundColor: '#667eea',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Store chart references for updates
+            window.statusChart = statusChart;
+            window.reportTypeChart = reportTypeChart;
         }
 
-        // Initialize chart on page load if PX tab is active
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if px-scoring tab is active on load
-            if (document.getElementById('px-scoring-tab').classList.contains('active')) {
-                initializePXChart();
-            }
-        });
+        // Filter functions
+        function applyFilters() {
+            const reportType = document.getElementById('reportTypeFilter').value;
+            const status = document.getElementById('statusFilter').value;
 
-        function downloadPXScoringCSV() {
-            // Define the CSV headers as specified
-            const headers = [
-                'Submission Timestamp',
-                'Submitter Slack Email', 
-                'Quarter',
-                'Year',
-                'ER Token',
-                'Type of Error',
-                'PX Severity',
-                'Details of Error (Reminder: DO NOT POST PII!)',
-                'Error made by'
-            ];
-            
-            // Start CSV content with headers
-            let csvContent = headers.join(',') + '\n';
-            
-            // Get current date info for Quarter and Year
+            filteredData = transferData.filter(transfer => {
+                const matchesReportType = reportType === 'All' || transfer.reportType === reportType;
+                const matchesStatus = status === 'All' || transfer.status === status;
+                return matchesReportType && matchesStatus;
+            });
+
+            updateStats();
+            renderTable();
+            updateCharts();
+        }
+
+        // Update charts with filtered data
+        function updateCharts() {
+            // Update Status Chart
+            const statusCounts = {};
+            filteredData.forEach(transfer => {
+                statusCounts[transfer.status] = (statusCounts[transfer.status] || 0) + 1;
+            });
+
+            window.statusChart.data.labels = Object.keys(statusCounts);
+            window.statusChart.data.datasets[0].data = Object.values(statusCounts);
+            window.statusChart.update();
+
+            // Update Report Type Chart
+            const reportTypeCounts = {};
+            filteredData.forEach(transfer => {
+                reportTypeCounts[transfer.reportType] = (reportTypeCounts[transfer.reportType] || 0) + 1;
+            });
+
+            window.reportTypeChart.data.labels = Object.keys(reportTypeCounts);
+            window.reportTypeChart.data.datasets[0].data = Object.values(reportTypeCounts);
+            window.reportTypeChart.update();
+        }
+
+        // Add new transfer
+        function addTransfer() {
+            const employer = document.getElementById('employerName').value;
+            const reportType = document.getElementById('newReportType').value;
+            const employeeCount = parseInt(document.getElementById('employeeCount').value);
+            const status = document.getElementById('transferStatus').value;
+            const taskToken = document.getElementById('taskToken').value;
+            const assignedTo = document.getElementById('assignedTo').value;
+            const notes = document.getElementById('transferNotes').value;
+
+            if (!employer || !reportType || !employeeCount || !status || !taskToken || !assignedTo) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const newTransfer = {
+                id: nextId++,
+                date: new Date().toISOString().split('T')[0],
+                employer,
+                reportType,
+                employeeCount,
+                status,
+                taskToken,
+                assignedTo,
+                notes
+            };
+
+            transferData.unshift(newTransfer);
+            applyFilters();
+            clearForm();
+            alert('Transfer added successfully!');
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('employerName').value = '';
+            document.getElementById('newReportType').value = '';
+            document.getElementById('employeeCount').value = '';
+            document.getElementById('transferStatus').value = '';
+            document.getElementById('taskToken').value = '';
+            document.getElementById('assignedTo').value = '';
+            document.getElementById('transferNotes').value = '';
+        }
+
+        // Edit transfer (placeholder)
+        function editTransfer(id) {
+            const transfer = transferData.find(t => t.id === id);
+            if (transfer) {
+                // Populate form with existing data
+                document.getElementById('employerName').value = transfer.employer;
+                document.getElementById('newReportType').value = transfer.reportType;
+                document.getElementById('employeeCount').value = transfer.employeeCount;
+                document.getElementById('transferStatus').value = transfer.status;
+                document.getElementById('taskToken').value = transfer.taskToken;
+                document.getElementById('assignedTo').value = transfer.assignedTo;
+                document.getElementById('transferNotes').value = transfer.notes;
+                
+                // Remove the old record
+                transferData = transferData.filter(t => t.id !== id);
+                applyFilters();
+            }
+        }
+
+        // Delete transfer
+        function deleteTransfer(id) {
+            if (confirm('Are you sure you want to delete this transfer record?')) {
+                transferData = transferData.filter(t => t.id !== id);
+                applyFilters();
+            }
+        }
+
+        // Refresh data
+        function refreshData() {
+            applyFilters();
+            updateLastUpdated();
+            alert('Data refreshed successfully!');
+        }
+
+        // Export data to CSV
+        function exportData() {
+            const headers = ['Date', 'Employer', 'Report Type', 'Employee Count', 'Status', 'Task Token', 'Assigned To', 'Notes'];
+            const csvContent = [
+                headers.join(','),
+                ...filteredData.map(transfer => [
+                    transfer.date,
+                    `"${transfer.employer}"`,
+                    transfer.reportType,
+                    transfer.employeeCount,
+                    transfer.status,
+                    transfer.taskToken,
+                    transfer.assignedTo,
+                    `"${transfer.notes}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `PPH_Transfers_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Update last updated timestamp
+        function updateLastUpdated() {
             const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentQuarter = Math.ceil((now.getMonth() + 1) / 3);
-            
-            // Process PX Scoring data from the table
-            const table = document.getElementById('pxScoringTable');
-            const dataRows = table.querySelectorAll('tbody tr');
-            
-            dataRows.forEach(function(row) {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 3) {
-                    const taskToken = cells[0].textContent.trim();
-                    const pxError = cells[1].textContent.trim();
-                    const submissionStatus = cells[2].textContent.trim();
-                    
-                    // Only include rows with actual P3 errors
-                    if (pxError === 'P3') {
-                        // Extract submission info if available
-                        let submissionTimestamp = '';
-                        let submitterEmail = '';
-                        let errorDetails = '';
-                        
-                        if (submissionStatus && submissionStatus !== '') {
-                            // Parse submission status for timestamp and submitter
-                            const match = submissionStatus.match(/\[(\d{1,2}\/\d{1,2})\]\[([^\]]+)\]/);
-                            if (match) {
-                                submissionTimestamp = `${match[1]}/${currentYear}`;
-                                submitterEmail = `${match[2].toLowerCase()}@squareup.com`;
-                                errorDetails = submissionStatus;
-                            }
-                        }
-                        
-                        // Create CSV row with proper escaping
-                        const rowData = [
-                            submissionTimestamp,
-                            submitterEmail,
-                            `Q${currentQuarter}`,
-                            currentYear.toString(),
-                            taskToken,
-                            'Process Error', // Default type
-                            'P3',
-                            errorDetails,
-                            '' // Error made by - to be filled manually
-                        ];
-                        
-                        // Escape CSV fields that contain commas or quotes
-                        const escapedRow = rowData.map(field => {
-                            if (field.includes(',') || field.includes('"') || field.includes('\n')) {
-                                return '"' + field.replace(/"/g, '""') + '"';
-                            }
-                            return field;
-                        });
-                        
-                        csvContent += escapedRow.join(',') + '\n';
-                    }
-                }
-            });
-            
-            // Create and download the file
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                
-                // Generate filename with current date
-                const dateStr = now.getFullYear() + '-' + 
-                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                              String(now.getDate()).padStart(2, '0');
-                const timeStr = String(now.getHours()).padStart(2, '0') + '-' + 
-                              String(now.getMinutes()).padStart(2, '0');
-                
-                link.setAttribute('download', `PX_Scoring_Template_${dateStr}_${timeStr}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Show success message
-                alert('📥 PX Scoring CSV template downloaded successfully!\n\nFile: PX_Scoring_Template_' + dateStr + '_' + timeStr + '.csv\n\nNote: Please review and complete the "Error made by" column before submission.');
-            } else {
-                alert('❌ CSV download not supported in this browser.');
-            }
+            const timeString = now.toLocaleTimeString();
+            const dateString = now.toLocaleDateString();
+            document.getElementById('lastUpdated').textContent = `Last updated: ${dateString} at ${timeString}`;
         }
+
+        // Event listeners
+        document.getElementById('reportTypeFilter').addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
     </script>
 </body>
 </html>
