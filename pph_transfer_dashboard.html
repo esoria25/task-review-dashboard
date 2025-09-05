@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPH Transfer Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .last-updated {
+            position: absolute;
+            bottom: 15px;
+            right: 30px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .controls-section {
+            background: #f8f9fa;
+            padding: 25px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .dropdown {
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            font-size: 1em;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+        
+        .dropdown:hover {
+            border-color: #667eea;
+        }
+        
+        .dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.success {
+            border-left-color: #28a745;
+        }
+        
+        .stat-card.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .stat-card.danger {
+            border-left-color: #dc3545;
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1em;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            background: white;
+        }
+        
+        .chart-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .chart-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .transfer-form {
+            background: white;
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .form-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-input {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .transfer-table {
+            background: white;
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .table-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-review {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .table-wrapper {
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>PPH Transfer Dashboard</h1>
+            <p>Previous Payroll History Transfer Management & Analytics</p>
+            <div class="last-updated" id="lastUpdated">Last updated: September 05, 2025 at 09:45 AM</div>
+        </div>
+        
+        <div class="controls-section">
+            <div class="control-group">
+                <label class="control-label">Report Type:</label>
+                <select class="dropdown" id="reportTypeFilter">
+                    <option value="All">All Report Types</option>
+                    <option value="Paychex">Paychex</option>
+                    <option value="ADP">ADP</option>
+                    <option value="Sure Payroll">Sure Payroll</option>
+                    <option value="TOAST">TOAST</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Status Filter:</label>
+                <select class="dropdown" id="statusFilter">
+                    <option value="All">All Statuses</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                    <option value="Review">Under Review</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh Data</button>
+            <button class="btn btn-success" onclick="exportData()">📥 Export CSV</button>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-card success">
+                <div class="stat-value" id="totalTransfers">156</div>
+                <div class="stat-label">Total Transfers</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value" id="completedTransfers">142</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value" id="pendingTransfers">8</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-value" id="failedTransfers">6</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successRate">91%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+        
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">Transfer Status Distribution</div>
+                <canvas id="statusChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Transfers by Report Type</div>
+                <canvas id="reportTypeChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="transfer-form">
+            <div class="form-title">📝 New PPH Transfer Entry</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Employer Name</label>
+                    <input type="text" class="form-input" id="employerName" placeholder="Enter employer name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Report Type</label>
+                    <select class="form-input" id="newReportType">
+                        <option value="">Select Report Type</option>
+                        <option value="Paychex">Paychex</option>
+                        <option value="ADP">ADP</option>
+                        <option value="Sure Payroll">Sure Payroll</option>
+                        <option value="TOAST">TOAST</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Employee Count</label>
+                    <input type="number" class="form-input" id="employeeCount" placeholder="Number of employees">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transfer Status</label>
+                    <select class="form-input" id="transferStatus">
+                        <option value="">Select Status</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Failed">Failed</option>
+                        <option value="Review">Under Review</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Task Token</label>
+                    <input type="text" class="form-input" id="taskToken" placeholder="task_XXXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Assigned To</label>
+                    <input type="text" class="form-input" id="assignedTo" placeholder="Team member name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Transfer Notes</label>
+                <textarea class="form-input form-textarea" id="transferNotes" placeholder="Enter any notes about the transfer process, issues encountered, or special requirements..."></textarea>
+            </div>
+            <button class="btn btn-success" onclick="addTransfer()">➕ Add Transfer</button>
+        </div>
+        
+        <div class="transfer-table">
+            <div class="table-title">📊 PPH Transfer Records</div>
+            <div class="table-wrapper">
+                <table class="data-table" id="transferTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Employer</th>
+                            <th>Report Type</th>
+                            <th>Employee Count</th>
+                            <th>Status</th>
+                            <th>Task Token</th>
+                            <th>Assigned To</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transferTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample PPH Transfer data
+        let transferData = [
+            {
+                id: 1,
+                date: '2025-09-05',
+                employer: 'ABC Manufacturing Inc',
+                reportType: 'Paychex',
+                employeeCount: 45,
+                status: 'Completed',
+                taskToken: 'task_PPH001',
+                assignedTo: 'Esther',
+                notes: 'Standard PPH transfer completed successfully. All employee records validated.'
+            },
+            {
+                id: 2,
+                date: '2025-09-04',
+                employer: 'Tech Solutions LLC',
+                reportType: 'ADP',
+                employeeCount: 23,
+                status: 'Pending',
+                taskToken: 'task_PPH002',
+                assignedTo: 'Jonas',
+                notes: 'Waiting for missing payroll data from Q2. ER contacted for additional information.'
+            },
+            {
+                id: 3,
+                date: '2025-09-04',
+                employer: 'Downtown Restaurant Group',
+                reportType: 'TOAST',
+                employeeCount: 67,
+                status: 'Review',
+                taskToken: 'task_PPH003',
+                assignedTo: 'Liberty',
+                notes: 'Complex transfer with multiple locations. Requires manual verification of tip allocations.'
+            },
+            {
+                id: 4,
+                date: '2025-09-03',
+                employer: 'Small Business Co',
+                reportType: 'Sure Payroll',
+                employeeCount: 8,
+                status: 'Failed',
+                taskToken: 'task_PPH004',
+                assignedTo: 'Rebecca',
+                notes: 'Transfer failed due to corrupted PPH file. Requesting new file from ER.'
+            },
+            {
+                id: 5,
+                date: '2025-09-03',
+                employer: 'Healthcare Partners',
+                reportType: 'Other',
+                employeeCount: 156,
+                status: 'Completed',
+                taskToken: 'task_PPH005',
+                assignedTo: 'Jay',
+                notes: 'Large healthcare organization transfer completed with custom payroll system integration.'
+            },
+            {
+                id: 6,
+                date: '2025-09-02',
+                employer: 'Construction Works Inc',
+                reportType: 'ADP',
+                employeeCount: 34,
+                status: 'Completed',
+                taskToken: 'task_PPH006',
+                assignedTo: 'Cess',
+                notes: 'Union payroll transfer with prevailing wage calculations verified.'
+            }
+        ];
+
+        let filteredData = [...transferData];
+        let nextId = 7;
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            updateStats();
+            renderTable();
+            initializeCharts();
+            updateLastUpdated();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = filteredData.length;
+            const completed = filteredData.filter(t => t.status === 'Completed').length;
+            const pending = filteredData.filter(t => t.status === 'Pending').length;
+            const failed = filteredData.filter(t => t.status === 'Failed').length;
+            const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('totalTransfers').textContent = total;
+            document.getElementById('completedTransfers').textContent = completed;
+            document.getElementById('pendingTransfers').textContent = pending;
+            document.getElementById('failedTransfers').textContent = failed;
+            document.getElementById('successRate').textContent = successRate + '%';
+        }
+
+        // Render transfer table
+        function renderTable() {
+            const tbody = document.getElementById('transferTableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(transfer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(transfer.date).toLocaleDateString()}</td>
+                    <td><strong>${transfer.employer}</strong></td>
+                    <td><span style="background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">${transfer.reportType}</span></td>
+                    <td>${transfer.employeeCount}</td>
+                    <td><span class="status-badge status-${transfer.status.toLowerCase()}">${transfer.status}</span></td>
+                    <td style="font-family: monospace; font-size: 0.9em; color: #666;">${transfer.taskToken}</td>
+                    <td>${transfer.assignedTo}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${transfer.notes}">${transfer.notes}</td>
+                    <td>
+                        <button onclick="editTransfer(${transfer.id})" style="background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em;">Edit</button>
+                        <button onclick="deleteTransfer(${transfer.id})" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8em; margin-left: 5px;">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Status Chart
+            const statusCounts = {};
+            filteredData.forEach(transfer => {
+                statusCounts[transfer.status] = (statusCounts[transfer.status] || 0) + 1;
+            });
+
+            const statusChart = new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Report Type Chart
+            const reportTypeCounts = {};
+            filteredData.forEach(transfer => {
+                reportTypeCounts[transfer.reportType] = (reportTypeCounts[transfer.reportType] || 0) + 1;
+            });
+
+            const reportTypeChart = new Chart(document.getElementById('reportTypeChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(reportTypeCounts),
+                    datasets: [{
+                        label: 'Transfers',
+                        data: Object.values(reportTypeCounts),
+                        backgroundColor: '#667eea',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Store chart references for updates
+            window.statusChart = statusChart;
+            window.reportTypeChart = reportTypeChart;
+        }
+
+        // Filter functions
+        function applyFilters() {
+            const reportType = document.getElementById('reportTypeFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            filteredData = transferData.filter(transfer => {
+                const matchesReportType = reportType === 'All' || transfer.reportType === reportType;
+                const matchesStatus = status === 'All' || transfer.status === status;
+                return matchesReportType && matchesStatus;
+            });
+
+            updateStats();
+            renderTable();
+            updateCharts();
+        }
+
+        // Update charts with filtered data
+        function updateCharts() {
+            // Update Status Chart
+            const statusCounts = {};
+            filteredData.forEach(transfer => {
+                statusCounts[transfer.status] = (statusCounts[transfer.status] || 0) + 1;
+            });
+
+            window.statusChart.data.labels = Object.keys(statusCounts);
+            window.statusChart.data.datasets[0].data = Object.values(statusCounts);
+            window.statusChart.update();
+
+            // Update Report Type Chart
+            const reportTypeCounts = {};
+            filteredData.forEach(transfer => {
+                reportTypeCounts[transfer.reportType] = (reportTypeCounts[transfer.reportType] || 0) + 1;
+            });
+
+            window.reportTypeChart.data.labels = Object.keys(reportTypeCounts);
+            window.reportTypeChart.data.datasets[0].data = Object.values(reportTypeCounts);
+            window.reportTypeChart.update();
+        }
+
+        // Add new transfer
+        function addTransfer() {
+            const employer = document.getElementById('employerName').value;
+            const reportType = document.getElementById('newReportType').value;
+            const employeeCount = parseInt(document.getElementById('employeeCount').value);
+            const status = document.getElementById('transferStatus').value;
+            const taskToken = document.getElementById('taskToken').value;
+            const assignedTo = document.getElementById('assignedTo').value;
+            const notes = document.getElementById('transferNotes').value;
+
+            if (!employer || !reportType || !employeeCount || !status || !taskToken || !assignedTo) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const newTransfer = {
+                id: nextId++,
+                date: new Date().toISOString().split('T')[0],
+                employer,
+                reportType,
+                employeeCount,
+                status,
+                taskToken,
+                assignedTo,
+                notes
+            };
+
+            transferData.unshift(newTransfer);
+            applyFilters();
+            clearForm();
+            alert('Transfer added successfully!');
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('employerName').value = '';
+            document.getElementById('newReportType').value = '';
+            document.getElementById('employeeCount').value = '';
+            document.getElementById('transferStatus').value = '';
+            document.getElementById('taskToken').value = '';
+            document.getElementById('assignedTo').value = '';
+            document.getElementById('transferNotes').value = '';
+        }
+
+        // Edit transfer (placeholder)
+        function editTransfer(id) {
+            const transfer = transferData.find(t => t.id === id);
+            if (transfer) {
+                // Populate form with existing data
+                document.getElementById('employerName').value = transfer.employer;
+                document.getElementById('newReportType').value = transfer.reportType;
+                document.getElementById('employeeCount').value = transfer.employeeCount;
+                document.getElementById('transferStatus').value = transfer.status;
+                document.getElementById('taskToken').value = transfer.taskToken;
+                document.getElementById('assignedTo').value = transfer.assignedTo;
+                document.getElementById('transferNotes').value = transfer.notes;
+                
+                // Remove the old record
+                transferData = transferData.filter(t => t.id !== id);
+                applyFilters();
+            }
+        }
+
+        // Delete transfer
+        function deleteTransfer(id) {
+            if (confirm('Are you sure you want to delete this transfer record?')) {
+                transferData = transferData.filter(t => t.id !== id);
+                applyFilters();
+            }
+        }
+
+        // Refresh data
+        function refreshData() {
+            applyFilters();
+            updateLastUpdated();
+            alert('Data refreshed successfully!');
+        }
+
+        // Export data to CSV
+        function exportData() {
+            const headers = ['Date', 'Employer', 'Report Type', 'Employee Count', 'Status', 'Task Token', 'Assigned To', 'Notes'];
+            const csvContent = [
+                headers.join(','),
+                ...filteredData.map(transfer => [
+                    transfer.date,
+                    `"${transfer.employer}"`,
+                    transfer.reportType,
+                    transfer.employeeCount,
+                    transfer.status,
+                    transfer.taskToken,
+                    transfer.assignedTo,
+                    `"${transfer.notes}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `PPH_Transfers_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Update last updated timestamp
+        function updateLastUpdated() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const dateString = now.toLocaleDateString();
+            document.getElementById('lastUpdated').textContent = `Last updated: ${dateString} at ${timeString}`;
+        }
+
+        // Event listeners
+        document.getElementById('reportTypeFilter').addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html>
